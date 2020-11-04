@@ -6,7 +6,7 @@
 int main(int argc, char *argv[]){
 	int socket_desc;
 	struct sockaddr_in server;
-	char *message;
+	char* message;
 	char server_reply[2000];
 
 	//Creating socket
@@ -20,14 +20,12 @@ int main(int argc, char *argv[]){
 	server.sin_port = htons(22);
 
 	//Connect to remote server
-	if (connect(socket_desc ,(struct sockaddr *)&server ,sizeof(server)) < 0) {
+	if (connect(socket_desc ,(struct sockaddr*)&server ,sizeof(server)) < 0) {
 		puts("\n connection error\n");
 		return 1;
 	}
 
 	puts("\n Your socket is connected successfully\n");
-
-	message = "GET / HTTP1.1\r\n\r\n";
 	if ( send(socket_desc ,message, strlen(message),0) < 0 ){
 		puts("\n Send failed\n");
 		return 1;
@@ -35,13 +33,12 @@ int main(int argc, char *argv[]){
 	puts("\n Data Send\n");
 
 	//Receive a reply from the server
-	if ( recv(socket_desc, server_reply,2000,0) < 0 ){
+	if ( recv(socket_desc, server_reply, 2000 ,0) < 0 ){
 		puts("\n receving fails\n");
 		return 1;
 	}
-	puts("\n Receiving Successfully");
-	//puts(server_reply);
-
-//	close(socket_desc);
+	
+	puts("\n ");
+	pu
 	return 0;
 }
