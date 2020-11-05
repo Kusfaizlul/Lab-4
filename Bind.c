@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<stdlib.h>
 #include<sys/socket.h>
 #include<arpa/inet.h>
 
@@ -17,22 +18,24 @@ int main(int argc, char *argv[]){
 	server.sin_port = htons(8888);
 
 	//Bind
-	if( bind(socket_desc,(struct sockaddr*)&server,sizeof(server)) < 0 ){
+	if( bind(socket_desc,(struct sockaddr *)&server,sizeof(server)) < 0 ){
 		puts("\n bind failed");
 	}
 	
 	//Listen
-	listen(socket_desc , 3);
+	if( listen(socket_desc , 3) < 0 ){
+		puts("\n Listen failed");
+	}
 
 	puts("\n Waiting for incoming connections.. ");
 
 	c = sizeof(struct sockaddr_in);
 
-	new_soc = accept(socket_desc,(struct sockaddr*)&client,(socklen_t*)&c);
+	new_soc = accept(socket_desc,(struct sockaddr *)&client,(socklen_t*)&c);
 
-	if (new_soc < 0 )
-		perror (" accept failed");
+	if (new_soc < 0 ){
+		perror (" accept failed");}
 
-	puts("\n Done accept.. ");
+
 	return 0;
 }
