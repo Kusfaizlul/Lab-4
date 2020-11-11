@@ -6,6 +6,8 @@
 #include<netinet/in.h>
 #include<unistd.h>
 #include<sys/types.h>
+#include<sys/wait.h>
+#include<errno.h>
 
 int main(int argc, char *argv[]){
         int soc, new_soc ,c,optval = 1;
@@ -21,7 +23,7 @@ int main(int argc, char *argv[]){
                 printf("\n Could not create socket ");
 
         server.sin_family = AF_INET;
-        server.sin_addr.s_addr = INADDR_ANY;
+        server.sin_addr.s_addr = inet_addr("192.168.14.10");
         server.sin_port = htons(8190);
 
         //Socket Option
@@ -48,43 +50,53 @@ int main(int argc, char *argv[]){
 
         puts("\n Waiting for incoming connections.. ");
 
-        //Accept
         c = sizeof(struct sockaddr_in);
-        char buf[] = "Client x Left The Chat";
-        int loop = 0;
 
-        while(loop != -1)
-        {
-                new_soc = accept(soc,(struct sockaddr *)&client,(socklen_t*)&c);
-                if ( new_soc > 0){
-                        char im[2000];
-                        recv(new_soc,im,2000,0);
-                        printf("\n %s",im);
-                        //Send and Receive
-                        int i = 99;
-                        while(i != 0 ){
+        while(1){
+                new_soc = accept(soc,(struct sockaddr *)&client,(socklen_t*)&c); //Accept New Con
+                if ( new_soc < 0){
+                        perror(" No Connecction");
+                        puts("\n\n Waiting For New Connection ...");
+                        exit(EXIT_FAILURE);
+                }
+                int pid = fork();
+
+                if (pid < 0){
+                        perror("\n Fork Error");
+                        exit(EXIT_FAILURE);
+                }
+
+                else if ( pid == 0){ // Child process
+                        close(soc);
+
+                        char im[2000], name[10]; // Temporary hold from client
+
+                        recv(new_soc,name,2000,0);
+
+
+                        printf("\n %s Join The Chat\n", name);
+                        int i = 0;
+                        while(1){//Send and recv department
                                 recv(new_soc,text,2000,0);
-                                int a = strncmp(text,buf,6);
 
-                                if( a == 0){
-                                        printf("\n Client : %s",text);
-                                        printf("\n Waiting for new connection..");
+                                if(strcmp(text,"stop\n")== 0){
+                                        printf("\n %s Left The Chat", name);
                                         break;
-                                }
+                                        }
 
                                 else{
-                                        printf("\n Client : %s",text);
-                                        printf(" \n Reply : ");
+                                        printf("\n %s : %s",name,text);
+                                        printf(" \n Reply    : ");
                                         fgets(reply,sizeof(reply),stdin);
                                         send(new_soc,reply,2000,0);
                                 }
                         }
-
                 }
+
                 else
-                        printf("\n Waiting for new connection..");
+                        close(new_soc);
         }
         close(soc);
+
         exit(EXIT_SUCCESS);
 }
-
